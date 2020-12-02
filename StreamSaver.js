@@ -245,26 +245,28 @@
 
     return (!useBlobFallback && ts && ts.writable) || new streamSaver.WritableStream({
       write (chunk) {
-        if (useBlobFallback) {
-          // Safari... The new IE6
-          // https://github.com/jimmywarting/StreamSaver.js/issues/69
-          //
-          // even doe it has everything it fails to download anything
-          // that comes from the service worker..!
-          chunks.push(chunk)
-          return
-        }
-
-        // is called when a new chunk of data is ready to be written
-        // to the underlying sink. It can return a promise to signal
-        // success or failure of the write operation. The stream
-        // implementation guarantees that this method will be called
-        // only after previous writes have succeeded, and never after
-        // close or abort is called.
-
-        // TODO: Kind of important that service worker respond back when
-        // it has been written. Otherwise we can't handle backpressure
-        // EDIT: Transfarable streams solvs this...
+		  if (useBlobFallback) {
+			  // Safari... The new IE6
+			  // https://github.com/jimmywarting/StreamSaver.js/issues/69
+			  //
+			  // even doe it has everything it fails to download anything
+			  // that comes from the service worker..!
+			  chunks.push(chunk)
+			  return
+		  }
+		  if (chunk.constructor !== Uint8Array) {
+			  console.log('Data saving only works with Uint8Array');
+		  }
+		  // is called when a new chunk of data is ready to be written
+		  // to the underlying sink. It can return a promise to signal
+		  // success or failure of the write operation. The stream
+		  // implementation guarantees that this method will be called
+		  // only after previous writes have succeeded, and never after
+		  // close or abort is called.
+	
+		  // TODO: Kind of important that service worker respond back when
+		  // it has been written. Otherwise we can't handle backpressure
+		  // EDIT: Transfarable streams solvs this...
         channel.port1.postMessage(chunk)
         bytesWritten += chunk.length
 
